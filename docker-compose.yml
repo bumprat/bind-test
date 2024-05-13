@@ -1,0 +1,56 @@
+services:
+  service1:
+    build: .
+    image: bind-alpine 
+    ports: [1051:53/tcp, "1051:53/udp"]
+    command: [named, -f]
+    volumes: ["server1-volume:/etc/bind/"]
+    networks:
+      bind-network:
+        ipv4_address: 192.168.0.1
+  service2:
+    depends_on: [service1]
+    image: bind-alpine 
+    ports: [1052:53/tcp, 1052:53/udp]
+    command: [named, -f]
+    volumes: [server1-volume:/etc/bind/]
+    networks:
+      bind-network:
+        ipv4_address: 192.168.0.2
+  service3:
+    depends_on: [service1]
+    image: bind-alpine 
+    ports: [1053:53/tcp, 1053:53/udp]
+    command: [named, -f]
+    volumes: [server1-volume:/etc/bind/]
+    networks:
+      bind-network:
+        ipv4_address: 192.168.0.3
+volumes:
+  server1-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./server1-conf
+  server2-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./server2-conf
+  server3-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./server3-conf
+networks:
+  bind-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.254
+    
